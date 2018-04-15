@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+
+  <title>Force-Directed Graph using D3.js v.1</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons|Raleway" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.13/vuetify.min.css">
+
+  <style>
+    /* Hide side scrollbar if content does not need it */
+    html {
+      overflow-y: auto; 
+    }
+    
+    .application {
+      font-family: 'Raleway', sans-serif;
+      line-height: 2rem;
+      text-align: center;
+    }
+
+    /* Full screen background */
+    #app {
+      /* Location of the image */
+      /* background-image: url(https://raw.githubusercontent.com/ijklim/gdp/gh-pages/assets/img/bg.jpg); */
+      background-image: url(assets/img/bg.jpg);
+
+      /* Background image is centered vertically and horizontally at all times */
+      background-position: center center;
+
+      /* Background image doesn't tile */
+      background-repeat: no-repeat;
+
+      /* Background image is fixed in the viewport so that it doesn't move when 
+     the content's height is greater than the image's height */
+      background-attachment: fixed;
+
+      /* This is what makes the background image rescale based
+     on the container's size */
+      background-size: cover;
+
+      /* Set a background color that will be displayed
+     while the background image is loading */
+      background-color: #464646;
+    }
+
+    .tooltip {
+      font-family: 'Raleway';
+      font-size: 1.2em;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      background: rgba(13, 71, 161, .9);
+      color: white;
+      max-width: 250px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- https://codepen.io/ivanlim/full/??? -->
+  <!-- Vuetify Material color palette: https://vuetifyjs.com/en/style/colors -->
+  <v-app id="app">
+    <v-container fluid fill-height>
+      <v-layout align-center wrap>
+        <v-flex xs12 class="mb-5">
+          <d3-wrapper :app-name="appName" :d3-data="d3Data"></d3-wrapper>
+        </v-flex>
+      </v-layout>
+    </v-container>
+  </v-app>
+
+  <script src='https://cdn.jsdelivr.net/npm/vue'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.13/vuetify.min.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="./components/d3-wrapper.js"></script>
+  <script src="./components/d3-heatmap.js"></script>
+  <script type='text/javascript'>
+    let v = new Vue({
+      el: '#app',
+      data () {
+        return {
+          appName: 'National Contiguity',
+          d3Data: [],
+        }
+      },
+      methods: {
+        formatTooltipData (value, temperature) {
+          return `
+            <div>
+              ${value.year} - ${moment(value.month, 'M').format('MMMM')}<br>
+              ${temperature.toFixed(3)}°C<br>
+              ${value.variance}°C
+            </div>
+          `;
+        },
+        initD3Data () {
+          let url = 'https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json';
+          fetch(url)
+            .then(response => response.json())
+            .then(json => {
+              this.d3Data = json.monthlyVariance.map(value => ({
+                x: value.year,
+                y: value.month,
+                temperature: (json.baseTemperature + value.variance).toFixed(3),
+                tooltip: this.formatTooltipData(value, json.baseTemperature + value.variance),
+              }));
+            })
+            .catch(error => {
+              console.error("Error encountered", error);
+            });
+        },
+      },
+      mounted () {
+        this.initD3Data();
+      }
+    });
+  </script>
+</body>
