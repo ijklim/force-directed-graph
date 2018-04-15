@@ -1,6 +1,6 @@
 const WRAPPER = {
   margin: 20,
-  headerHeight: 100,
+  headerHeight: 70,
   background: 'rgba(255, 255, 255, .95)',
 }
 
@@ -11,7 +11,7 @@ Vue.component('d3-wrapper', {
       :style="wrapperStyles"
     >
       <div :style="wrapperHeader">
-        {{ appName }}<br>
+        {{ appName }}
       </div>
 
       <d3-force-directed-graph
