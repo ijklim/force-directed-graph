@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://ijklim.github.io/force-directed-graph/">
-    <img src="./screenshot.jpg" width="100px">
+    <img src="./screenshot.jpg" width="1000px">
     <br>
     Live Demo
   </a>
