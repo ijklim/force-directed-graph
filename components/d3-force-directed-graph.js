@@ -1,8 +1,6 @@
 Vue.component('d3-force-directed-graph', {
   template: `
-    <div>
     <canvas :id="id" :height="graphHeight" :width="graphWidth"></canvas>
-    </div>
   `,
   // svg cannot be property by itself, changes object type during assignment, within ddd object is fine
   data () {
@@ -77,12 +75,36 @@ Vue.component('d3-force-directed-graph', {
     },
     drawNode (node) {
       this.context.beginPath();
-      // Change color of node
-      this.context.fillStyle = 'red';
-      this.context.moveTo(node.x, node.y);
-      // Draw circle
-      this.context.arc(node.x, node.y, this.nodeRadius, 0, 2 * Math.PI);
-      this.context.fill();
+      // Dimension flag in sprite `flags.png`
+      let sprite = {
+        height: 11,
+        width: 16,
+      };
+
+      // Extract values from style rule, remove negative sign, e.g. 66 from -66px
+      let getSpritePosition = (styleValue) => {
+        // May start with -
+        // Take all digits before "px"
+        return styleValue.match(/[-]?([\d]+)/)[1];
+      };
+
+      let img = new Image(sprite.width, sprite.height);   
+      img.src = "./assets/img/flags.png";
+      img.className = `flag flag-${node.code}`;
+      img.alt = 'test';
+      let computedStyle = window.getComputedStyle(img);
+
+      this.context.drawImage(
+        img,
+        getSpritePosition(computedStyle.backgroundPositionX),
+        getSpritePosition(computedStyle.backgroundPositionY),
+        sprite.width,
+        sprite.height,
+        node.x - 8,
+        node.y - 5,
+        sprite.width,
+        sprite.height
+      );
     },
     update () {
       this.context.clearRect(0, 0, this.graphWidth, this.graphHeight);
@@ -109,7 +131,7 @@ Vue.component('d3-force-directed-graph', {
         // charge will instruct nodes to repulse each other
         .force('charge', d3
           .forceManyBody()
-          .strength(-100)
+          .strength(-70)
         )
         // Mapping array links and nodes
         .force('link', d3
@@ -117,8 +139,11 @@ Vue.component('d3-force-directed-graph', {
           // Indicate which field in nodes is source mapping to
           // .id(d => d.country)
         )
+        // Setting decay to 0 simulation will never stop
+        // .alphaDecay(0)
         .on('tick', this.update);
-        
+      
+      // Ref: https://github.com/d3/d3-force
       // Once simulation is executed, x, y, vy, vx will be added to nodes
       simulation
         .nodes(this.d3Data.nodes)
@@ -134,5 +159,7 @@ Vue.component('d3-force-directed-graph', {
     // Note: Code below must be in mounted(), created() does not work
     this.canvas = d3.select(`#${this.id}`);
     this.context = this.canvas.node().getContext('2d');
+
+
   },
 });
